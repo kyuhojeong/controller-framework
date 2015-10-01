@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import keyring
 import time
 import signal
 import socket
@@ -16,6 +17,7 @@ from collections import OrderedDict
 from CBT import CBT as _CBT
 from CFxHandle import CFxHandle
 
+CONFIG = ipoplib.CONFIG
 
 class CFX(object):
 
@@ -44,8 +46,10 @@ class CFX(object):
         self.ip4 = self.CONFIG['AddressMapper']["ip4"]
         if(self.vpn_type == 'GroupVPN'):
             self.uid = ipoplib.gen_uid(self.ip4)  # SHA-1 Hash
+            CONFIG["uid"] = self.uid
         elif(self.vpn_type == 'SocialVPN'):
             self.uid = self.CONFIG['CFx']['local_uid']
+            CONFIG["uid"] = self.uid
         self.ip6 = ipoplib.gen_ip6(self.uid)
 
         if socket.has_ipv6:
@@ -300,12 +304,21 @@ class CFX(object):
                              "must be specified in config file or string")
 
         if "xmpp_password" not in self.CONFIG["CFx"]:
-            prompt = "\nPassword for %s:" % self.CONFIG["CFx"]["xmpp_username"]
-            if args.pwdstdout:
-                self.CONFIG["CFx"]["xmpp_password"] = getpass(prompt,
+            if not args.update_config:
+                temp = keyring.get_password("ipop", CONFIG["xmpp_username"])
+            if temp == None and "xmpp_password" not in CONFIG:
+                prompt = "\nPassword for %s:" % self.CONFIG["CFx"]["xmpp_username"]
+                if args.pwdstdout:
+                    self.CONFIG["CFx"]["xmpp_password"] = getpass(prompt,
                                                               stream=sys.stdout)
-            else:
-                self.CONFIG["CFx"]["xmpp_password"] = getpass(prompt)
+                else:
+                    self.CONFIG["CFx"]["xmpp_password"] = getpass(prompt)
+            if temp != None:
+                CONFIG["xmpp_password"] = temp
+            try:
+                keyring.set_password("ipop", CONFIG["xmpp_username"],CONFIG["xmpp_password"])
+            except:
+                raise RuntimeError("Unable to store password in keyring")
 
         if args.ip_config:
             ipoplib.load_peer_ip_config(args.ip_config)

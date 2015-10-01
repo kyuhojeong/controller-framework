@@ -6,7 +6,7 @@
         "xmpp_host": "",
         "stat_report": true,
         "tincan_logging": 0,
-        "icc": true,
+        "icc": false,
         "icc_port": 30000,
         "vpn_type": "GroupVPN"
     },
@@ -47,6 +47,11 @@
     },
     "Watchdog":{
         "timer_interval": 15,
+        "joinEnabled": true,
+        "dependencies": ["Logger"]
+    },
+    "StatReport":{
+        "timer_interval": 1,
         "joinEnabled": true,
         "dependencies": ["Logger"]
     }

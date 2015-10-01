@@ -41,7 +41,7 @@ CONFIG = {
         "multihop_sr": True,  # Multihop source route
         "stat_report": False,
         "stat_server": "metrics.ipop-project.org",
-        "stat_server_port": 5000
+        "stat_server_port": 80
     },
     "TincanListener": {
         "buf_size": 65507,
@@ -90,7 +90,14 @@ CONFIG = {
     "Watchdog": {
         "timer_interval": 15,
         "joinEnabled": False,
-    }
+    },
+    "StatReport": {
+        "timer_interval": 200,
+        "joinEnabled": True,
+    },
+    "uid" : None,
+    "ipop_ver" : "\x02"
+
 }
 
 IP_MAP = {}
